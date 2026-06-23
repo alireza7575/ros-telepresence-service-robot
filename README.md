@@ -17,6 +17,33 @@ The project was originally built during the COVID-era service robot period. It i
 - Simple socket-based audio client/server prototype
 - Separate Windows and Ubuntu experiment folders
 
+## Architecture
+
+```mermaid
+flowchart LR
+    Operator["Operator browser"]
+    Teleop["web/teleop<br>Browser control UI"]
+    Launcher["apps/launcher<br>Service launcher"]
+    Audio["apps/audio<br>Audio client/server"]
+    Video["apps/video_stream<br>Flask/OpenCV stream"]
+    ROSBridge["ros/packages/ros_bridge<br>ROS bridge scripts"]
+    ROSServices["ROS services<br>rosbridge, rosserial, web_video_server"]
+    Cameras["Astra + USB thermal cameras"]
+    Robot["Robot base / microcontroller"]
+    Vendor["vendor/<br>Copied ROS dependencies"]
+
+    Operator --> Teleop
+    Teleop --> ROSBridge
+    Launcher --> Audio
+    Launcher --> ROSServices
+    Launcher --> Video
+    Launcher --> Cameras
+    ROSBridge --> ROSServices
+    ROSServices --> Robot
+    Cameras --> Video
+    Vendor -. supports .-> ROSServices
+```
+
 ## Repository Layout
 
 ```text
