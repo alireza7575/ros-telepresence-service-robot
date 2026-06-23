@@ -19,19 +19,37 @@ The project was originally built during the COVID-era service robot period. It i
 
 ## Repository Layout
 
-- `main.py` - Legacy Python 2 Tkinter launcher for ROS services.
-- `Ubuntu/` - Python 3 Flask/video-streaming experiment files.
-- `Windows/` - Windows-oriented copy of the Flask/video-streaming experiment files.
-- `html/` - Browser UI for robot video and teleoperation.
-- `ros_bridge/` - ROS package with bridge/listener/talker scripts.
-- `usb_cam-develop/` - Vendored ROS USB camera package used for thermal camera launch experiments.
-- `web_video_server/` and `async_web_server_cpp/` - Vendored ROS web video dependencies.
+```text
+ros-telepresence-service-robot/
+  apps/
+    launcher/
+    audio/
+    video_stream/
+      ubuntu/
+      windows/
+  config/
+  ros/
+    launch/
+    packages/
+  vendor/
+  web/
+    teleop/
+```
+
+- `apps/launcher/` - Legacy Python 2 Tkinter launcher for starting and stopping robot services.
+- `apps/audio/` - Socket-based audio client/server prototype.
+- `apps/video_stream/` - Flask/OpenCV camera streaming experiments, split into `ubuntu/` and `windows/` variants.
+- `web/teleop/` - Browser UI for robot video and teleoperation.
+- `ros/packages/ros_bridge/` - ROS package with bridge/listener/talker scripts.
+- `ros/launch/` - Custom launch files owned by this project.
+- `vendor/` - Third-party or copied ROS packages kept for historical reproducibility.
+- `config/` - Example robot configuration.
 
 ## Requirements
 
 - ROS Kinetic-era environment
-- Python 2 for the legacy root `main.py`
-- Python 3 for the `Ubuntu/` and `Windows/` Flask experiments
+- Python 2 for the legacy `apps/launcher/main.py`
+- Python 3 for the `apps/video_stream/ubuntu/` and `apps/video_stream/windows/` Flask experiments
 - Astra camera ROS package
 - `rosbridge_server`
 - `rosserial_python`
@@ -47,7 +65,7 @@ pip install -r requirements.txt
 
 ## Configuration
 
-The launcher reads `config.json`:
+The launcher reads `config/robot.local.json` when it exists, otherwise it falls back to `config/robot.example.json`:
 
 ```json
 {
@@ -55,14 +73,20 @@ The launcher reads `config.json`:
 }
 ```
 
-Update `robotIp` to match the robot or remote computer on your network.
+Create a local config when running the launcher:
+
+```bash
+cp config/robot.example.json config/robot.local.json
+```
+
+Then update `robotIp` to match the robot or remote computer on your network. `robot.local.json` is ignored by Git.
 
 ## Legacy Launcher
 
 From a ROS environment:
 
 ```bash
-python2 main.py
+python2 apps/launcher/main.py
 ```
 
 The launcher starts these commands:
@@ -72,9 +96,9 @@ rosrun web_video_server web_video_server
 roslaunch astra_camera astra.launch
 roslaunch rosbridge_server rosbridge_websocket.launch
 rosrun rosserial_python serial_node.py /dev/ttyACM0
-roslaunch usb_cam thermal_cam.launch
-python server.py
-python client.py <robot-ip>
+roslaunch ros/launch/thermal_cam.launch
+python apps/audio/server.py
+python apps/audio/client.py <robot-ip>
 ```
 
 ## Notes

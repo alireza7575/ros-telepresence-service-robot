@@ -7,6 +7,10 @@ import Tkinter as tk
 import string, time
 import json
 
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+CONFIG_PATH = os.path.join(REPO_ROOT, "config", "robot.local.json")
+EXAMPLE_CONFIG_PATH = os.path.join(REPO_ROOT, "config", "robot.example.json")
+
 global config
 global webServer
 global camera
@@ -27,12 +31,12 @@ webServer = "rosrun web_video_server web_video_server"
 camera = "roslaunch astra_camera astra.launch"
 rosBridge = "roslaunch rosbridge_server rosbridge_websocket.launch"
 rosSerial = "rosrun rosserial_python serial_node.py /dev/ttyACM0"
-thermalCamera = "roslaunch usb_cam thermal_cam.launch"
+thermalCamera = "roslaunch ros/launch/thermal_cam.launch"
 thermalCameraId = None
 audioServerlId = None
-audioServer = "python server.py"
+audioServer = "python apps/audio/server.py"
 audioClientlId = None
-audioClient = "python client.py"
+audioClient = "python apps/audio/client.py"
 webServerId = None
 cameraId = None
 rosBridgeId = None
@@ -58,13 +62,14 @@ def saveconfig():
     global config
     config = {'robotIp': textentry.get()}
     print(config)
-    with open('config.json', 'w') as f:
+    with open(CONFIG_PATH, 'w') as f:
         json.dump(config, f)
 
 def loadconfig():
     global config
     try:
-        with open('config.json', 'r') as f:
+        config_path = CONFIG_PATH if os.path.exists(CONFIG_PATH) else EXAMPLE_CONFIG_PATH
+        with open(config_path, 'r') as f:
             config = json.load(f)
             print(config)
             textentry.insert (0,str(config['robotIp']))
@@ -77,7 +82,7 @@ def kill (task):
 def run (command):
     try:
         print(command.split(" "))
-        return subprocess.Popen(command.split(" "))
+        return subprocess.Popen(command.split(" "), cwd=REPO_ROOT)
     except :
         return None
 
